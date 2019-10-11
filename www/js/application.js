@@ -49,6 +49,7 @@ class Application {
 
     onResize(evt) {
 
+
         this.canvas.width = window.innerWidth;
         this.canvas.height = window.innerHeight;
 
@@ -57,6 +58,8 @@ class Application {
         let width = Math.floor(window.innerWidth / scaleFactor);
         let offsetX = (window.innerWidth - scaleFactor * width) / 2;
         let offsetY = (window.innerHeight - scaleFactor * height) / 2;
+
+        document.body.style.fontSize = scaleFactor + "px";
 
 
         this.viewport = {

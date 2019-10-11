@@ -1,16 +1,34 @@
-body,html {
-    margin:0;
-    padding:0;
-    height: 100%;
+:root {
+  --primary: #393782;
 }
 
+body,
+html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
 
 body {
-    background-image: url(../img/bg.jpg);
-    background-size: cover;
-    background-position: center center;
+  background-image: url(../img/bg.jpg);
+  background-size: cover;
+  background-position: center center;
 }
 
 canvas {
-    display: block;
+  display: block;
+}
+
+button {
+  font-size: inherit;
+  background: transparent;
+  border: 2px solid var(--primary);
+  border-radius: 0.5vw;
+  color: var(--primary);
+}
+
+button.sn-close-button {
+  position: absolute;
+  top: 1vw;
+  right: 1vw;
 }
