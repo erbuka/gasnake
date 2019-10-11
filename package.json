@@ -1,0 +1,21 @@
+{
+  "name": "gasnake",
+  "version": "1.0.0",
+  "description": "A simple snake game",
+  "scripts": {
+    "build-ghpages": "ncp ./platforms/browser/www/ ./docs/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/erbuka/gasnake.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/erbuka/gasnake/issues"
+  },
+  "homepage": "https://github.com/erbuka/gasnake#readme",
+  "devDependencies": {
+    "ncp": "^2.0.0"
+  }
+}
