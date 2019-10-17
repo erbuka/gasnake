@@ -3,8 +3,13 @@ const Constants = {
     Colors: {
         Primary: "#393782",
         Secondary: "#90A59E",
+        Highlight: "#cc0070",
         Shadow: "rgba(0,0,0,.5)",
+        Light: "#EAEEED",
         LightGray: "#ccc"
+    },
+    Keys: {
+        Highscore: "GA_SNAKE_HIGHSCORE"
     }
 }
 
@@ -44,6 +49,23 @@ class Application {
         this.onResize(null);
 
         this.loop();
+    }
+
+    setFontSize(size) {
+        this.ctx.font = size + "px silkscreennormal";
+    }
+
+    saveScore(score) {
+        let hs = this.getHighScore();
+
+        if(score > hs) {
+            localStorage.setItem(Constants.Keys.Highscore, score);
+        }
+    }
+
+    getHighScore() {
+        let val = localStorage.getItem(Constants.Keys.Highscore);
+        return val ? parseInt(val) : 0;
     }
 
     onResize(evt) {
@@ -105,9 +127,13 @@ class Application {
 
         let now = Date.now();
 
+        let elapesed = (now - this.startTime) / 1000;
+        let delta = (now - this.prevTime) / 1000
+
         let time = {
-            elapsed: (now - this.startTime) / 1000,
-            delta: (now - this.prevTime) / 1000
+            elapsed: elapesed,
+            delta: delta,
+            fract: elapesed - Math.floor(elapesed)
         };
 
         this.prevTime = now;

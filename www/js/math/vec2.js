@@ -10,6 +10,12 @@ class Vec2 {
         return this;
     }
 
+    mulScalar(k) {
+        this.x *= k;
+        this.y *= k;
+        return this;
+    }
+
     copy(v) {
         this.x = v.x;
         this.y = v.y;

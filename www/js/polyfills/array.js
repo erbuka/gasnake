@@ -11,3 +11,7 @@ Array.prototype.shuffle = function () {
     return result;
 
 }
+
+Array.prototype.pushFront = function (...e) {
+    this.splice(0, 0, ...e);
+}

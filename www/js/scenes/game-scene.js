@@ -2,7 +2,8 @@
 
 const GameStates = {
     Playing: 0,
-    Paused: 1
+    Paused: 1,
+    GameOver: 2
 }
 
 const GridValues = {
@@ -24,11 +25,14 @@ class GameScene extends Scene {
     constructor(app) {
         super(app);
 
-        this.gridHeight = app.viewport.height;
-        this.gridWidth = app.viewport.width;
+        this.snakeInitialLength = 3;
+        this.gridOffset = 0;
+        this.gridHeight = app.viewport.height - this.gridOffset * 2;
+        this.gridWidth = app.viewport.width - this.gridOffset * 2;
+        this.score = 0;
 
         this.initializeGame();
-        this.addRenderFunction(this.renderGameField.bind(this));
+        this.addRenderFunction(this.renderGame.bind(this));
 
         setTimeout(this.gameMessage.bind(this, "3"), 0);
         setTimeout(this.gameMessage.bind(this, "2"), 1000);
@@ -48,7 +52,7 @@ class GameScene extends Scene {
             let ctx = this.app.ctx;
             ctx.save();
             {
-                ctx.font = "3px sans-serif";
+                this.app.setFontSize(3);
                 ctx.textBaseline = "middle";
                 ctx.textAlign = "center";
                 ctx.translate(this.app.viewport.width / 2, this.app.viewport.height / 2);
@@ -59,7 +63,7 @@ class GameScene extends Scene {
                 ctx.fillStyle = Constants.Colors.Shadow;
                 ctx.fillText(text, 0.1, 0.1);
 
-                ctx.fillStyle = Constants.Colors.Primary;
+                ctx.fillStyle = Constants.Colors.Highlight;
                 ctx.fillText(text, 0, 0);
 
 
@@ -85,7 +89,6 @@ class GameScene extends Scene {
         this.nextDirection = null;
 
         this.grid = new Array(this.gridWidth * this.gridHeight).fill(GridValues.Empty);
-        this.setGrid(center.x, center.y, GridValues.Snake);
         for (let y = 0; y < this.gridHeight; y++) {
             this.setGrid(0, y, GridValues.Wall);
             this.setGrid(this.gridWidth - 1, y, GridValues.Wall);
@@ -95,7 +98,15 @@ class GameScene extends Scene {
             this.setGrid(x, this.gridHeight - 1, GridValues.Wall)
         }
 
-        this.snake = [new Vec2().copy(center)];
+        this.snake = [];
+        for (let i = 0; i < this.snakeInitialLength; i++) {
+            this.snake.push(new Vec2().copy(center).add(Directions.Left.clone().mulScalar(i)));
+        }
+
+
+        for (let s of this.snake)
+            this.setGrid(s.x, s.y, GridValues.Snake);
+
         this.generateFruit();
 
     }
@@ -142,6 +153,9 @@ class GameScene extends Scene {
     }
 
     update(time) {
+
+        const GAME_OVER_TIME = 2;
+
         if (this.gameState === GameStates.Playing) {
             this.speedTimer += time.delta * this.speed;
 
@@ -162,15 +176,15 @@ class GameScene extends Scene {
                 switch (this.getGrid(newHead.x, newHead.y)) {
                     case GridValues.Fruit:
                         // Eat fruit
+                        this.score += 10;
                         this.setGrid(newHead.x, newHead.y, GridValues.Snake);
                         this.snake.splice(0, 0, newHead);
                         this.generateFruit();
                         break;
                     case GridValues.Wall:
-                        // GameOver
-                        break;
                     case GridValues.Snake:
-                        // GameOver
+                        this.gameState = GameStates.GameOver;
+                        setTimeout(() => this.app.gotoScene(new GameOverScene(this.app, this.score)), GAME_OVER_TIME * 1000);
                         break;
                     case GridValues.Empty:
 
@@ -189,79 +203,111 @@ class GameScene extends Scene {
         }
     }
 
-    renderGameField(time) {
+    renderGame(time) {
+
+        const SNAKE_STR = "GLOBAL OUTSOURCING TEAM 5";
 
         this.update(time);
 
         let ctx = this.app.ctx;
         let viewport = this.app.viewport;
 
-        let drawWall = (x, y) => {
-            // Shadow
-            ctx.fillStyle = Constants.Colors.Shadow;
-            ctx.fillRect(x + viewport.shadowSize, y + viewport.shadowSize, 1, 1);
+        ctx.save();
+        {
+
+            let drawWall = (x, y) => {
+                // Shadow
+                ctx.fillStyle = Constants.Colors.Shadow;
+                ctx.fillRect(x + viewport.shadowSize, y + viewport.shadowSize, 1, 1);
 
 
-            // Wall
-            ctx.fillStyle = Constants.Colors.Secondary;
-            ctx.fillRect(x, y, 1, 1);
-        }
+                // Wall
+                ctx.fillStyle = Constants.Colors.Secondary;
+                ctx.fillRect(x, y, 1, 1);
+            }
 
 
+            ctx.translate(this.gridOffset, this.gridOffset);
+
+            this.app.setFontSize(1);
+            ctx.textBaseline = "middle";
+            ctx.textAlign = "center";
 
 
-        ctx.font = "1px sans-serif";
-        ctx.textBaseline = "middle";
-        ctx.textAlign = "center";
-
-        // Snake shadow
-        ctx.fillStyle = Constants.Colors.Shadow
-        for (let v of this.snake) {
-            ctx.fillRect(v.x + 0.1, v.y + 0.1, 1, 1);
-        }
-
-        // Background grid
-        ctx.strokeStyle = Constants.Colors.LightGray;
-        ctx.lineWidth = 1 / this.app.viewport.scaleFactor;
-        for (let x = 0; x < this.gridWidth; x++) {
-            ctx.beginPath();
-            ctx.moveTo(x, 0);
-            ctx.lineTo(x, this.gridHeight);
-            ctx.stroke();
-        }
-        for (let y = 0; y < this.gridHeight; y++) {
-            ctx.beginPath();
-            ctx.moveTo(0, y);
-            ctx.lineTo(this.gridWidth, y);
-            ctx.stroke();
-        }
-
-
-
-
-        let fruitText = "A";
-
-        // Draw walls and fruit
-        for (let x = 0; x < this.gridWidth; x++) {
+            // Background grid
+            ctx.strokeStyle = Constants.Colors.LightGray;
+            ctx.lineWidth = 1 / this.app.viewport.scaleFactor;
+            for (let x = 0; x < this.gridWidth; x++) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, this.gridHeight);
+                ctx.stroke();
+            }
             for (let y = 0; y < this.gridHeight; y++) {
-                switch (this.getGrid(x, y)) {
-                    case GridValues.Fruit:
-                        ctx.fillStyle = Constants.Colors.Primary;
-                        ctx.fillText(fruitText, x + 0.5, y + 0.5);
-                        break;
-                    case GridValues.Wall:
-                        drawWall(x, y);
-                        break;
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(this.gridWidth, y);
+                ctx.stroke();
+            }
+
+
+            let fruitText = "A";
+
+            // Snake shadow
+            ctx.fillStyle = Constants.Colors.Shadow
+            for (let v of this.snake) {
+                ctx.fillRect(v.x + 0.1, v.y + 0.1, 1, 1);
+            }
+
+
+            // Draw walls and fruit
+            for (let x = 0; x < this.gridWidth; x++) {
+                for (let y = 0; y < this.gridHeight; y++) {
+                    switch (this.getGrid(x, y)) {
+                        case GridValues.Fruit:
+
+                            ctx.fillStyle = Constants.Colors.Shadow;
+                            ctx.fillRect(x + viewport.shadowSize, y + viewport.shadowSize, 1, 1);
+
+                            ctx.fillStyle = Constants.Colors.Highlight;
+                            ctx.fillRect(x, y, 1, 1);
+
+                            ctx.fillStyle = Constants.Colors.Light;
+                            ctx.fillText(fruitText, x + 0.5, y + 0.5);
+                            break;
+                        case GridValues.Wall:
+                            drawWall(x, y);
+                            break;
+                    }
                 }
             }
-        }
+
+            // Draw snake
+            ctx.fillStyle = this.gameState === GameStates.GameOver ?
+                (Math.cos(50 * time.elapsed) >= 0 ? Constants.Colors.Primary : Constants.Colors.Highlight) :
+                Constants.Colors.Primary;
 
 
-        // Draw snake 
-        ctx.fillStyle = Constants.Colors.Primary;
-        for (let v of this.snake) {
-            ctx.fillRect(v.x, v.y, 1, 1);
+            for (let v of this.snake) {
+                ctx.fillRect(v.x, v.y, 1, 1);
+            }
+
+            ctx.fillStyle = Constants.Colors.Light;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            for (let i = this.snakeInitialLength; i < this.snake.length && i < SNAKE_STR.length + this.snakeInitialLength; i++) {
+                let i0 = i - this.snakeInitialLength;
+                ctx.fillText(SNAKE_STR.charAt(i0), this.snake[i].x + 0.5, this.snake[i].y + 0.5);
+            }
+
+            // Draw score
+            this.app.setFontSize(1);
+            ctx.fillStyle = Constants.Colors.Primary;
+            ctx.textAlign = "left";
+            ctx.textBaseline = "top";
+            ctx.fillText("Score: " + this.score, 1, 0);
         }
+        ctx.restore();
 
     }
 }

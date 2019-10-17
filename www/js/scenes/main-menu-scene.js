@@ -11,15 +11,53 @@ class MainMenuScene extends Scene {
             "XXXXX.X...X.X...X.X...X.XXXXX"
         ];
 
+        this.tapToPlay = false;
+
 
         this.addRenderFunction(this.renderTitle.bind(this));
+        this.addRenderFunction(this.renderTapToPlay.bind(this));
+
+    }
+
+    renderTapToPlay(time, data) {
+        const INTERVAL = 10;
+        const ENABLE_TAP_TO_PLAY = 2;
+
+        let delta = (Math.cos(time.elapsed * INTERVAL) + 1) / 2;
+
+        let ctx = this.app.ctx;
+        let viewport = this.app.viewport;
+
+        ctx.save();
+        {
+            ctx.translate(viewport.width / 2, viewport.height / 4 * 3);
+            this.app.setFontSize(1);
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+
+            if (data.elapsedTime > ENABLE_TAP_TO_PLAY) {
+
+                this.tapToPlay = true;
+                ctx.globalAlpha = delta;
+                ctx.fillStyle = Constants.Colors.Primary;
+                ctx.fillText("Tap to Play!", 0, 0);
+            }
+
+            ctx.globalAlpha = 1;
+            ctx.translate(0, 2);
+            ctx.fillStyle = Constants.Colors.Primary;
+            ctx.fillText("HighScore: " + this.app.getHighScore(), 0, 0);
+
+        }
+        ctx.restore();
+
 
     }
 
     renderTitle(time, data) {
 
-        
         const RENDER_TIME = 2;
+
         if (data.invocationID === 0) {
             data.spriteWidth = this.titleSpriteData[0].length;
             data.spriteHeight = this.titleSpriteData.length;
@@ -32,7 +70,6 @@ class MainMenuScene extends Scene {
                 }
             }
 
-
             data.cells = data.cells.shuffle();
 
         }
@@ -43,6 +80,25 @@ class MainMenuScene extends Scene {
         let idxDelta = cell - idx;
         let ctx = this.app.ctx;
         let viewport = this.app.viewport;
+
+        // "GLOBAL OUTSOURCING"
+        ctx.save();
+        {
+            this.app.setFontSize(2);
+            ctx.textAlign = "center";
+            ctx.translate(viewport.width / 2, viewport.height / 4 - 1);
+
+            // Shadow
+            ctx.fillStyle = Constants.Colors.Shadow;
+            ctx.fillText("Global Outsourcing", viewport.shadowSize, viewport.shadowSize);
+
+            // Text
+            ctx.fillStyle = Constants.Colors.Primary;
+            ctx.fillText("Global Outsourcing", 0, 0);
+
+        }
+        ctx.restore();
+
 
         ctx.save();
         {
@@ -79,6 +135,7 @@ class MainMenuScene extends Scene {
     }
 
     onTap(evt) {
-        this.app.gotoScene(new GameScene(this.app));
+        if (this.tapToPlay)
+            this.app.gotoScene(new GameScene(this.app));
     }
 }
