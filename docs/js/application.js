@@ -2,7 +2,7 @@ const Constants = {
     VirtualHeight: 20,
     Colors: {
         Primary: "#393782",
-        Secondary: "#90A59E",
+        Secondary: "#CACACA",
         Highlight: "#cc0070",
         Shadow: "rgba(0,0,0,.5)",
         Light: "#EAEEED",

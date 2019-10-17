@@ -84,7 +84,7 @@ class GameScene extends Scene {
         this.gameState = GameStates.Paused;
 
         this.direction = new Vec2().copy(Directions.Right);
-        this.speed = 10;
+        this.speed = 7;
         this.speedTimer = 0;
         this.nextDirection = null;
 
