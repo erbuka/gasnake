@@ -77,7 +77,7 @@ class Application {
     loadSound(id, src) {
         return new Promise((resolve, reject) => {
             let audio = new Audio();
-            audio.addEventListener("canplaythrough", resolve);
+            audio.addEventListener("canplay", resolve);
             this.soundBank[id] = audio;
             audio.src = src;
         })
