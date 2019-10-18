@@ -10,45 +10,77 @@ const Constants = {
     },
     Keys: {
         Highscore: "GA_SNAKE_HIGHSCORE"
+    },
+    Sfx: {
+        Countdown: 0,
+        Go: 1,
+        GameOver: 2,
+        EatFruit: 3
     }
 }
 
 class Application {
     start() {
-        let canvas = document.createElement("canvas");
-        let ctx = canvas.getContext("2d");
 
-        document.body.appendChild(canvas);
+        // Sounds
+        this.soundBank = {};
+
+        Promise.all([
+            this.loadSound(Constants.Sfx.Countdown, "sound/countdown.mp3"),
+            this.loadSound(Constants.Sfx.Go, "sound/go.mp3"),
+            this.loadSound(Constants.Sfx.GameOver, "sound/gameover.mp3"),
+            this.loadSound(Constants.Sfx.EatFruit, "sound/eat.mp3")
+        ]).then(() => {
+
+            let canvas = document.createElement("canvas");
+            let ctx = canvas.getContext("2d");
+
+            document.body.appendChild(canvas);
+
+            // Bind events
+            {
+                let hammer = new Hammer(canvas, {});
+
+                hammer.get("swipe").set({ direction: Hammer.DIRECTION_ALL });
+
+                hammer.on("swipeleft", this.onSwipe.bind(this));
+                hammer.on("swiperight", this.onSwipe.bind(this));
+                hammer.on("swipeup", this.onSwipe.bind(this));
+                hammer.on("swipedown", this.onSwipe.bind(this));
+                hammer.on("tap", this.onTap.bind(this));
+
+                window.addEventListener("keypress", this.onKeyPress.bind(this));
+                window.addEventListener("resize", this.onResize.bind(this));
+            }
 
 
-        // Bind events
-        {
-            let hammer = new Hammer(canvas, {});
+            // Init timing
+            this.startTime = this.prevTime = Date.now();
 
-            hammer.get("swipe").set({ direction: Hammer.DIRECTION_ALL });
+            this.canvas = canvas;
+            this.ctx = ctx;
 
-            hammer.on("swipeleft", this.onSwipe.bind(this));
-            hammer.on("swiperight", this.onSwipe.bind(this));
-            hammer.on("swipeup", this.onSwipe.bind(this));
-            hammer.on("swipedown", this.onSwipe.bind(this));
-            hammer.on("tap", this.onTap.bind(this));
+            // Init first scene
+            this.gotoScene(new MainMenuScene(this));
 
-            window.addEventListener("keypress", this.onKeyPress.bind(this));
-            window.addEventListener("resize", this.onResize.bind(this));
-        }
+            this.onResize(null);
 
-        // Init timing
-        this.startTime = this.prevTime = Date.now();
+            this.loop();
+        });
+    }
 
-        this.canvas = canvas;
-        this.ctx = ctx;
+    playSound(id) {
+        let a = new Audio(this.soundBank[id].src);
+        a.play();
+    }
 
-        // Init first scene
-        this.gotoScene(new MainMenuScene(this));
-
-        this.onResize(null);
-
-        this.loop();
+    loadSound(id, src) {
+        return new Promise((resolve, reject) => {
+            let audio = new Audio();
+            audio.addEventListener("canplaythrough", resolve);
+            this.soundBank[id] = audio;
+            audio.src = src;
+        })
     }
 
     setFontSize(size) {
@@ -58,7 +90,7 @@ class Application {
     saveScore(score) {
         let hs = this.getHighScore();
 
-        if(score > hs) {
+        if (score > hs) {
             localStorage.setItem(Constants.Keys.Highscore, score);
         }
     }

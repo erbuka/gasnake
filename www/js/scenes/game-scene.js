@@ -34,13 +34,23 @@ class GameScene extends Scene {
         this.initializeGame();
         this.addRenderFunction(this.renderGame.bind(this));
 
-        setTimeout(this.gameMessage.bind(this, "3"), 0);
-        setTimeout(this.gameMessage.bind(this, "2"), 1000);
-        setTimeout(this.gameMessage.bind(this, "1"), 2000);
+        setTimeout(() => {
+            this.gameMessage("3");
+            this.app.playSound(Constants.Sfx.Countdown);
+        }, 500);
+        setTimeout(() => {
+            this.gameMessage("2");
+            this.app.playSound(Constants.Sfx.Countdown);
+        }, 1500);
+        setTimeout(() => {
+            this.gameMessage("1");
+            this.app.playSound(Constants.Sfx.Countdown);
+        }, 2500);
         setTimeout(() => {
             this.gameMessage("Go!");
             this.gameState = GameStates.Playing;
-        }, 3000);
+            this.app.playSound(Constants.Sfx.Go);
+        }, 3500);
 
 
     }
@@ -154,7 +164,7 @@ class GameScene extends Scene {
 
     update(time) {
 
-        const GAME_OVER_TIME = 2;
+        const GAME_OVER_TIME = 1;
 
         if (this.gameState === GameStates.Playing) {
             this.speedTimer += time.delta * this.speed;
@@ -179,11 +189,13 @@ class GameScene extends Scene {
                         this.score += 10;
                         this.setGrid(newHead.x, newHead.y, GridValues.Snake);
                         this.snake.splice(0, 0, newHead);
+                        this.app.playSound(Constants.Sfx.EatFruit);
                         this.generateFruit();
                         break;
                     case GridValues.Wall:
                     case GridValues.Snake:
                         this.gameState = GameStates.GameOver;
+                        this.app.playSound(Constants.Sfx.GameOver);
                         setTimeout(() => this.app.gotoScene(new GameOverScene(this.app, this.score)), GAME_OVER_TIME * 1000);
                         break;
                     case GridValues.Empty:
@@ -205,7 +217,7 @@ class GameScene extends Scene {
 
     renderGame(time) {
 
-        const SNAKE_STR = "GLOBAL OUTSOURCING TEAM 5";
+        const SNAKE_STR = "GLOBAL OUTSOURCING GROUP 5";
 
         this.update(time);
 
