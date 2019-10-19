@@ -69,32 +69,19 @@ class Application {
     }
 
     playSound(id) {
-        if (device.platform === "browser") {
-            new Audio(this.soundBank[id].src).play();
-        } else {
-            new Media(this.soundBank[id].src).play();
-        }
+        new Audio(this.soundBank[id].src).play();
     }
-    
+
 
     loadSound(id, src) {
         return new Promise((resolve, reject) => {
-            if (device.platform === "browser") {
-                let audio = new Audio();
-                audio.addEventListener("canplay", resolve);
-                this.soundBank[id] = {
-                    src: src
-                };
-                audio.src = src;
-            } else {
-                this.soundBank[id] = {
-                    src:src
-                };
-                resolve();
-            }
-
-
-        })
+            let audio = new Audio();
+            audio.addEventListener("canplay", resolve);
+            this.soundBank[id] = {
+                src: src
+            };
+            audio.src = src;
+        });
     }
 
     setFontSize(size) {
