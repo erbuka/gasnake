@@ -53,7 +53,6 @@ class Application {
                 window.addEventListener("resize", this.onResize.bind(this));
             }
 
-
             // Init timing
             this.startTime = this.prevTime = Date.now();
 
@@ -70,17 +69,19 @@ class Application {
     }
 
     playSound(id) {
-        let a = new Audio(this.soundBank[id].src);
-        a.play();
+        new Audio(this.soundBank[id].src).play();
     }
+
 
     loadSound(id, src) {
         return new Promise((resolve, reject) => {
             let audio = new Audio();
             audio.addEventListener("canplay", resolve);
-            this.soundBank[id] = audio;
+            this.soundBank[id] = {
+                src: src
+            };
             audio.src = src;
-        })
+        });
     }
 
     setFontSize(size) {
