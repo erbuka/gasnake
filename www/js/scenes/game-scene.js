@@ -62,7 +62,7 @@ class GameScene extends Scene {
             let ctx = this.app.ctx;
             ctx.save();
             {
-                this.app.setFontSize(3);
+                this.app.setFontSize(5);
                 ctx.textBaseline = "middle";
                 ctx.textAlign = "center";
                 ctx.translate(this.app.viewport.width / 2, this.app.viewport.height / 2);
