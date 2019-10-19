@@ -53,7 +53,6 @@ class Application {
                 window.addEventListener("resize", this.onResize.bind(this));
             }
 
-
             // Init timing
             this.startTime = this.prevTime = Date.now();
 
@@ -70,16 +69,31 @@ class Application {
     }
 
     playSound(id) {
-        let a = new Audio(this.soundBank[id].src);
-        a.play();
+        if (device.platform === "browser") {
+            new Audio(this.soundBank[id].src).play();
+        } else {
+            new Media(this.soundBank[id].src).play();
+        }
     }
+    
 
     loadSound(id, src) {
         return new Promise((resolve, reject) => {
-            let audio = new Audio();
-            audio.addEventListener("canplay", resolve);
-            this.soundBank[id] = audio;
-            audio.src = src;
+            if (device.platform === "browser") {
+                let audio = new Audio();
+                audio.addEventListener("canplay", resolve);
+                this.soundBank[id] = {
+                    src: src
+                };
+                audio.src = src;
+            } else {
+                this.soundBank[id] = {
+                    src:src
+                };
+                resolve();
+            }
+
+
         })
     }
 
